@@ -1,0 +1,58 @@
+client_configs:
+  train_configs:
+    # Local trainer
+    trainer: "VanillaTrainer"
+    mode: "epoch"
+    num_local_epochs: 1
+    optim: "AdamW"
+    optim_args:
+      lr: 0.001
+    # Loss function
+    loss_fn_path: "./resources/loss/flamby_ixi.py"
+    loss_fn_name: "BaselineLoss"
+    # Client validation
+    do_validation: True
+    do_pre_validation: True
+    metric_path: "./resources/metric/flamby_ixi.py"
+    metric_name: "metric"
+    # Differential privacy
+    use_dp: False
+    # Data loader
+    train_batch_size: 2
+    val_batch_size: 2
+    train_data_shuffle: True
+    val_data_shuffle: False
+
+  model_configs:
+    model_path: "./resources/model/unet.py"
+    model_name: "Baseline"
+    model_kwargs:
+      dimensions: 3
+      out_channels_first_layer: 48
+      num_encoding_blocks: 3
+
+  comm_configs:
+    compressor_configs:
+      enable_compression: True
+      lossy_compressor: "QSGDCompressor"
+      lossless_compressor: "zstd"
+      qsgd_level: 1023
+      param_cutoff: 1024
+
+server_configs:
+  num_clients: 3
+  scheduler: "SyncScheduler"
+  scheduler_kwargs:
+    same_init_model: True
+  aggregator: "FedAvgAggregator"
+  aggregator_kwargs:
+    client_weights_mode: "equal"
+    expect_gradient: True
+  num_global_epochs: 10
+  logging_output_dirname: "./output"
+  logging_output_filename: "ixi_unet_qsgd_result"
+  comm_configs:
+    grpc_configs:
+      server_uri: 0.0.0.0:50051
+      max_message_size: 1048576
+      use_ssl: False

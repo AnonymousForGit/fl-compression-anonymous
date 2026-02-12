@@ -1,0 +1,9 @@
+name: flamby
+channels:
+  - conda
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pip
+  - pytest
+  - ipython
